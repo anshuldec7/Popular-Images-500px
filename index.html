@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Web Developer Assignment">
+    <meta name="keywords" content="Images, Popular">
+    <meta name="author" content="Anshul Agrawal">
+    <title>Popular Images</title>
+    <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body onload="onLoadMore();">
+    <div class="wrapper">
+        <div class="container">
+            <h1 id="heading" >Popular Images</h1>
+            <ul class="grid-nav">
+                <li><a href="#" id="500pxnav" data-id="500images" class="active">500px Images</a></li>
+                <li><a href="#" id="bookmarknav" data-id="three-columns">Book Marked Images</a></li>
+            </ul>
+            <hr />
+            <div id="500images" class="grid-container" style="display:block;">
+                <ul id="imagesList" class="rig columns-3">
+                </ul>
+                <button onclick="onLoadMore()" class ="loadMore" id="loadMore">Load More</button>
+                <div id="noMoreImages"></div>
+            </div>
+            <!--/#500px Images-->
+            <div id="three-columns" class="grid-container">
+                <ul id="markedImages" class="rig columns-3">
+                </ul>
+                <button onclick="bookMark()" class ="loadMore" id="loadMoreImages">Load More</button>
+                <div id="noImages"></div>
+            </div>
+            <!--/#BookMarked Images-->
+            <hr />
+            <p class="centered">Designed by <a href="http://anshul-agrawal.com">Anshul Agrawal</a></p>
+        </div>
+        <!--/.container-->
+    </div>
+    <!--/.wrapper-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" type="text/javascript" ></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.grid-nav li a').on('click', function(event) {
+                event.preventDefault();
+
+                var gridID = $(this).attr("data-id");
+                if($(this).attr("id") == "500pxnav") {
+                    window.location.reload();
+                }
+                else {
+                    var myNode = document.getElementById("noImages");
+                    while (myNode.firstChild) {
+                        myNode.removeChild(myNode.firstChild);
+                    }
+                    bookMark();
+                }
+                $('.grid-container').fadeOut(500, function() {
+                    $('#' + gridID).fadeIn(500);
+                });
+                $('.grid-nav li a').removeClass("active");
+                $(this).addClass("active");
+            });
+        });
+    
+    
+    function getJSON(url) {
+            var resp ;
+            var xmlHttp ;
+            resp  = '' ;
+            xmlHttp = new XMLHttpRequest();
+            if(xmlHttp != null) {
+                xmlHttp.open( "GET", url, false );
+                xmlHttp.send( null );
+                resp = xmlHttp.responseText;
+            }
+            return resp ;
+    }
+    
+    var gjson = getJSON('https://api.500px.com/v1/photos?feature=popular&sort=created_at&image_size=4&include_store=store_download&include_states=voted&consumer_key=vVn106xvA0C7wIoPEg8EUJqqR5LZUSEoTYy48a3s') ;
+    
+    var image = JSON.parse(gjson);
+    var count = 0;
+    function onLoadMore() {
+        var imageLimit = count + 6;
+        for(; count < imageLimit; count++) {
+            if(image.photos[count] === undefined) {
+                var hTag = document.createElement("h3");
+                var divTag = document.getElementById("noMoreImages");
+                divTag.appendChild(hTag);
+                hTag.textContent="No More Images to be displayed";
+                document.getElementById("loadMore").style.display = "none";
+                break;
+            }
+            var liTag = document.createElement("li");
+            var spanTag = document.createElement("span");
+            var paraTag = document.createElement("p");
+            var hTag = document.createElement("h3");
+            var anchorTag = document.createElement("a");
+            var figureTag = document.createElement("figure");
+            var imageTag = document.createElement("img");
+            var userImageTag = document.createElement("img");
+            var divTag = document.createElement("div");
+            var paraInDiv = document.createElement("p");
+            var hRow = document.createElement("hr");
+            var button = document.createElement("button");
+            var bookMarkText = document.createElement("p");
+            var iTag = document.createElement("i");
+            var textImgName = document.createElement("input");
+            textImgName.setAttribute("type" , "hidden");
+            textImgName.setAttribute("name", image.photos[count].name);
+            var textImgURL = document.createElement("input");
+            textImgURL.setAttribute("type" , "hidden");
+            textImgURL.setAttribute("name", image.photos[count].image_url);
+            var textUserURL = document.createElement("input");
+            textUserURL.setAttribute("type" , "hidden");
+            textUserURL.setAttribute("name", image.photos[count].user.userpic_url);
+            var textUserName = document.createElement("input");
+            textUserName.setAttribute("type" , "hidden");
+            textUserName.setAttribute("name", image.photos[count].user.fullname);
+            var testRating = document.createElement("input");
+            testRating.setAttribute("type" , "hidden");
+            testRating.setAttribute("name", image.photos[count].rating); 
+            iTag.setAttribute("class", "fa fa-heart heartSolid");
+            liTag.appendChild(imageTag);
+            liTag.appendChild(hTag);
+            liTag.appendChild(spanTag);
+            liTag.appendChild(divTag);
+            liTag.appendChild(hRow);
+            liTag.appendChild(bookMarkText);
+            liTag.appendChild(button);
+            liTag.appendChild(textImgName);
+            liTag.appendChild(textImgURL);
+            liTag.appendChild(textUserName);
+            liTag.appendChild(testRating);
+            liTag.appendChild(textUserURL);
+            divTag.appendChild(paraInDiv);
+            spanTag.appendChild(userImageTag);
+            spanTag.appendChild(paraTag);
+            hTag.appendChild(anchorTag);
+            anchorTag.textContent = image.photos[count].name;
+            paraTag.textContent = "Image By: " +image.photos[count].user.fullname;
+            userImageTag.src = image.photos[count].user.userpic_url;
+            paraInDiv.textContent = "Rating: " +image.photos[count].rating;
+
+            var ulTag = document.getElementById("imagesList");
+            ulTag.appendChild(liTag);
+            imageTag.src = image.photos[count].image_url;
+            anchorTag.href = image.photos[count].image_url;
+            button.textContent =  " Bookmark ";
+            button.setAttribute("id",  image.photos[count].id);
+            button.appendChild(iTag);
+            button.onclick = function addToFav(){
+                if (localStorage.test10) {
+                    var jsonObj = JSON.parse(localStorage.test10);
+                    jsonObj.id.push(this.getAttribute("id"));
+                    jsonObj.imageName.push(this.parentElement.childNodes[7].getAttribute("name"));
+                    jsonObj.imageURL.push(this.parentElement.childNodes[8].getAttribute("name"));
+                    jsonObj.userName.push(this.parentElement.childNodes[9].getAttribute("name"));
+                    jsonObj.rating.push(this.parentElement.childNodes[10].getAttribute("name"));
+                    jsonObj.userUrl.push(this.parentElement.childNodes[11].getAttribute("name"));
+                    localStorage.setItem("test10", JSON.stringify(jsonObj));
+                    //console.log(localStorage.test10);
+                } else {
+                    var jsonObj = { id : [], imageURL : [], imageName : [], userName : [], userUrl :[], rating : []};
+                    jsonObj.id.push(this.getAttribute("id"));
+                    jsonObj.imageName.push(this.parentElement.childNodes[7].getAttribute("name"));
+                    jsonObj.imageURL.push(this.parentElement.childNodes[8].getAttribute("name"));
+                    jsonObj.userName.push(this.parentElement.childNodes[9].getAttribute("name"));
+                    jsonObj.rating.push(this.parentElement.childNodes[10].getAttribute("name"));
+                    jsonObj.userUrl.push(this.parentElement.childNodes[11].getAttribute("name"));
+                    localStorage.setItem("test10", JSON.stringify(jsonObj));
+                    //console.log(localStorage.test10);
+                }
+                this.style.display = "none";
+                var removeBookMark = document.createElement("button");
+                removeBookMark.textContent =  "Remove Book Mark";
+                removeBookMark.setAttribute("name",  this.getAttribute("id"));
+                this.parentElement.appendChild(removeBookMark);
+                removeBookMark.onclick = function removeBookMark(){
+                    if (localStorage.test10) {
+                        var jsonObj = JSON.parse(localStorage.test10);
+                        var index = jsonObj.id.indexOf(this.getAttribute("name"));
+                        jsonObj.id.splice(index,1);
+                        jsonObj.imageName.splice(index,1);
+                        jsonObj.imageURL.splice(index,1);
+                        jsonObj.userName.splice(index,1);
+                        jsonObj.rating.splice(index,1);
+                        jsonObj.userUrl.splice(index,1);
+                        localStorage.setItem("test10", JSON.stringify(jsonObj));
+                        //console.log(localStorage.test10);
+                    } 
+                    document.getElementById(this.getAttribute("name")).style.display = "block";
+                    this.parentElement.removeChild(this);
+                }
+            }
+            if(localStorage.test10) {
+                var jsonObj = JSON.parse(localStorage.test10);
+                var index = jsonObj.id.indexOf("" + image.photos[count].id);
+                if(index != '-1' ) {
+                    document.getElementById(image.photos[count].id).style.display = "none";
+                    var removeBookMark = document.createElement("button");
+                    removeBookMark.textContent =  "Remove Book Mark";
+                    removeBookMark.setAttribute("name",  image.photos[count].id);
+                    document.getElementById(image.photos[count].id).parentElement.appendChild(removeBookMark);
+                    removeBookMark.onclick = function removeBookMark(){
+                        if (localStorage.test10) {
+                            var jsonObj = JSON.parse(localStorage.test10);
+                            var index = jsonObj.id.indexOf(this.getAttribute("name"));
+                            jsonObj.id.splice(index,1);
+                            jsonObj.imageName.splice(index,1);
+                            jsonObj.imageURL.splice(index,1);
+                            jsonObj.userName.splice(index,1);
+                            jsonObj.rating.splice(index,1);
+                            jsonObj.userUrl.splice(index,1);
+                            localStorage.setItem("test10", JSON.stringify(jsonObj));
+                            //console.log(localStorage.test10);
+                        } 
+                        document.getElementById(this.getAttribute("name")).style.display = "block";
+                        this.parentElement.removeChild(this);
+                    } 
+                }
+            }
+            
+        }
+    }
+
+    var i = 0;
+    function bookMark() {
+    var limit = i + 6;
+        if(localStorage.test10){
+        for(; i < limit; i++ ) {
+            var localData = JSON.parse(localStorage.test10);
+            if(localData.id[i] != "" && localData.id[i] != null) {
+                var liTag = document.createElement("li");
+                var spanTag = document.createElement("span");
+                var paraTag = document.createElement("p");
+                var hTag = document.createElement("h3");
+                var anchorTag = document.createElement("a");
+                var figureTag = document.createElement("figure");
+                var imageTag = document.createElement("img");
+                var userImageTag = document.createElement("img");
+                var divTag = document.createElement("div");
+                var paraInDiv = document.createElement("p");
+                var hRow = document.createElement("hr");
+                var bookMarkText = document.createElement("p");
+                liTag.appendChild(imageTag);
+                liTag.appendChild(hTag);
+                liTag.appendChild(spanTag);
+                liTag.appendChild(divTag);
+                liTag.appendChild(hRow);
+                liTag.appendChild(bookMarkText);
+                divTag.appendChild(paraInDiv);
+                spanTag.appendChild(userImageTag);
+                spanTag.appendChild(paraTag);
+                hTag.appendChild(anchorTag);
+                anchorTag.textContent = localData.imageName[i];
+                paraTag.textContent = "Image By: " +localData.userName[i];
+                userImageTag.src = localData.userUrl[i];
+                paraInDiv.textContent = "Rating: " +localData.rating[i];
+                var ulTag = document.getElementById("markedImages");
+                ulTag.appendChild(liTag);
+                imageTag.src = localData.imageURL[i];
+                anchorTag.href = localData.imageURL[i];
+                var removeBookMark = document.createElement("button");
+                removeBookMark.textContent =  "Remove Book Mark";
+                removeBookMark.setAttribute("id",  localData.id[i]);
+                liTag.appendChild(removeBookMark);
+                removeBookMark.onclick = function removeBookMark(){
+                    if (localStorage.test10) {  
+                        var jsonObj = JSON.parse(localStorage.test10);
+                        var index = jsonObj.id.indexOf(this.getAttribute("id"));
+                        jsonObj.id.splice(index,1);
+                        jsonObj.imageName.splice(index,1);
+                        jsonObj.imageURL.splice(index,1);
+                        jsonObj.userName.splice(index,1);
+                        jsonObj.rating.splice(index,1);
+                        jsonObj.userUrl.splice(index,1);
+                        localStorage.setItem("test10", JSON.stringify(jsonObj));
+                        //console.log(localStorage.test10);
+                    } 
+                    this.parentElement.style.display = "none";
+                } 
+            }
+            else {
+                var hTag = document.createElement("h3");
+                var divTag = document.getElementById("noImages");
+                divTag.appendChild(hTag);
+                hTag.textContent="No More Bookmarked images to be displayed";
+                document.getElementById("loadMoreImages").style.display = "none";
+                break;
+            }                                                       
+        }
+        }
+    }
+
+    </script>
+</body>
+</html>
